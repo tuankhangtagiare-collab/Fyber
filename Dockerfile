@@ -1,20 +1,20 @@
 FROM node:20-alpine AS base
+# Install OpenSSL and libc6-compat in the base so ALL stages have them
+RUN apk add --no-cache openssl libc6-compat
 
-# Install dependencies only when needed
+# Install dependencies
 FROM base AS deps
-RUN apk add --no-cache libc6-compat
 WORKDIR /app
-
 COPY package.json package-lock.json* ./
 RUN npm ci
 
-# Rebuild the source code only when needed
+# Build the application
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Generate Prisma Client AND create the SQLite database at build time
+# Generate Prisma Client and create SQLite database at build time
 ENV DATABASE_URL="file:./prisma/dev.db"
 RUN npx prisma@6 generate
 RUN npx prisma@6 db push --accept-data-loss --skip-generate
@@ -38,7 +38,6 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 
-# Ensure nextjs user can write to prisma dir for SQLite
 RUN chown -R nextjs:nodejs /app/prisma
 
 USER nextjs
