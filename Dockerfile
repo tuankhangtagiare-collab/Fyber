@@ -19,7 +19,7 @@ COPY . .
 RUN npx prisma generate
 
 # Next.js telemetry is disabled
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npm run build
 
@@ -27,11 +27,14 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
+
+# Fix permissions for the /app directory so nextjs user can create dev.db
+RUN chown -R nextjs:nodejs /app
 
 COPY --from=builder /app/public ./public
 
@@ -45,8 +48,8 @@ USER nextjs
 
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
 
 # Note: We will need to run prisma db push or migrate on start in a real production environment
 CMD ["node", "server.js"]
