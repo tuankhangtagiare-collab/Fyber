@@ -1,0 +1,19 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model UserQuota {
+  id               String   @id @default(cuid())
+  anonymousToken   String   @unique
+  requestCount     Int      @default(0)
+  imageCount       Int      @default(0)
+  videoCount       Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  lastRequestAt    DateTime @default(now())
+}
