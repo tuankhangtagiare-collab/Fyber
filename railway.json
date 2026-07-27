@@ -5,7 +5,7 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "prisma db push --accept-data-loss --skip-generate && node server.js",
+    "startCommand": "npx prisma db push --accept-data-loss --skip-generate && node server.js",
     "healthcheckPath": "/",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",

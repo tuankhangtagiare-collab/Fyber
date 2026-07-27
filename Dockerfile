@@ -30,13 +30,16 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Install prisma globally to avoid npx cache permission issues for nextjs user
-RUN npm install -g prisma@6.0.0
+# Install OpenSSL for Prisma to work properly in Alpine
+RUN apk add --no-cache openssl
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Fix permissions for the /app directory so nextjs user can create dev.db
+# Install prisma locally in the runner to avoid global cache permission errors
+RUN npm install prisma@6.0.0
+
+# Fix permissions for the /app directory so nextjs user can create dev.db and write engines
 RUN chown -R nextjs:nodejs /app
 
 COPY --from=builder /app/public ./public
