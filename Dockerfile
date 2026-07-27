@@ -16,7 +16,7 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 # Generate Prisma Client
-RUN npx prisma generate
+RUN npx prisma@6 generate
 
 # Next.js telemetry is disabled
 ENV NEXT_TELEMETRY_DISABLED=1
